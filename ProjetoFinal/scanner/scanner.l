@@ -11,17 +11,17 @@ RESERVADA       else|if|int|return|void|while
 OPERACOES       \+|\-|\*|\/
 COMPARADORES    (<|<=|>|>=|==|!=)
 
-SIMBOLO {OPERACOES}|{COMPARADORES}|\=|\;|\,|\(|\)|\{|\}
+SIMBOLO {OPERACOES}|{COMPARADORES}|\=|\;|\,|\(|\)|\[|\]|\{|\}
 
 COMENTARIO "/*"([^*]|\*+[^*/])*"\*/"
 
 %%
 
 {COMENTARIO}                printf("%s", yytext);
-{RESERVADA}                 printf("RESERVADA");
-{SIMBOLO}                   printf("SÍMBOLO");
-{LETRA}{LETRA}*             printf("ID");
-{DIGITO}{DIGITO}*           printf("NUM");
+{RESERVADA}                 printf("RESERVADA ");
+{SIMBOLO}                   printf("SÍMBOLO ");
+{LETRA}{LETRA}*             printf("ID ");
+{DIGITO}{DIGITO}*           printf("NUM ");
 
 %%
 
