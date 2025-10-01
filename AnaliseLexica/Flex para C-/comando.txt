@@ -1,0 +1,3 @@
+flex scanner.l
+gcc lex.yy.c -o scanner
+./scanner [sort.txt] // opcional passar o arquivo
