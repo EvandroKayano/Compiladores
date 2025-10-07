@@ -1,0 +1,13 @@
+APENAS NO SCANNER
+
+flex scanner.l
+gcc lex.yy.c -o scanner
+./scanner [sort.txt] // opcional passar o arquivo
+
+NO PARSER (no MSYS MINGW)
+cd /c/Users/Kayano/Documents/GitHub/Compiladores/ProjetoFinal/parser
+
+bison -d parser.y
+flex scanner.l
+gcc -o parser parser.tab.c lex.yy.c
+./parser sort.txt

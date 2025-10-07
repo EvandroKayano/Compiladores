@@ -6,9 +6,13 @@ LETRA           [a-zA-Z]
 ID              {LETRA}{LETRA}*
 NUM             {DIGITO}{DIGITO}*
 
-RESERVADA       else|if|int|return|void|while
+RESERVADA       else|if|return|while
+TIPO            int|void
 
-OPERACOES       \+|\-|\*|\/
+SOMA            \+|\-
+MULT            \*|\/
+
+OPERACOES       {SOMA}|{MULT}
 COMPARADORES    (<|<=|>|>=|==|!=)
 
 SIMBOLO {OPERACOES}|{COMPARADORES}|\=|\;|\,|\(|\)|\[|\]|\{|\}
@@ -19,6 +23,7 @@ COMENTARIO "/*"([^*]|\*+[^*/])*"\*/"
 
 {COMENTARIO}                printf("%s", yytext);
 {RESERVADA}                 printf("RESERVADA ");
+{TIPO}                      printf("TIPO ");
 {SIMBOLO}                   printf("SÍMBOLO ");
 {LETRA}{LETRA}*             printf("ID ");
 {DIGITO}{DIGITO}*           printf("NUM ");
