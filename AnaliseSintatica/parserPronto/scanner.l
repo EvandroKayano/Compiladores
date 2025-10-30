@@ -56,8 +56,7 @@ int main(int argc, char *argv[]){
     }
     else yyin = stdin;
     
-    yyparse();
-    //  yylex();
+    yylex();
 
     fprintf(stderr, "\nCódigo nos conformes com a linguagem C-.\n");
 

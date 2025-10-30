@@ -6,8 +6,9 @@ gcc lex.yy.c -o scanner
 
 NO PARSER (no MSYS MINGW)
 cd /c/Users/Kayano/Documents/GitHub/Compiladores/ProjetoFinal/parser
+cd /c/Users/Kayano/Documents/GitHub/Compiladores/AnaliseSintatica/testeArvore
 
 bison -d parser.y
 flex scanner.l
-gcc -o parser parser.tab.c lex.yy.c
+gcc -o parser parser.tab.c lex.yy.c arvore.c
 ./parser sort.txt
