@@ -56,31 +56,42 @@ extern int yydebug;
     YYUNDEF = 257,                 /* "invalid token"  */
     ID = 258,                      /* ID  */
     NUM = 259,                     /* NUM  */
-    OPN_PAR = 260,                 /* OPN_PAR  */
-    CLS_PAR = 261,                 /* CLS_PAR  */
-    OPN_CLC = 262,                 /* OPN_CLC  */
-    CLS_CLC = 263,                 /* CLS_CLC  */
-    OPN_CHA = 264,                 /* OPN_CHA  */
-    CLS_CHA = 265,                 /* CLS_CHA  */
-    PNT_VRG = 266,                 /* PNT_VRG  */
-    VRG = 267,                     /* VRG  */
-    EQ = 268,                      /* EQ  */
-    RETURN = 269,                  /* RETURN  */
-    WHILE = 270,                   /* WHILE  */
-    INT = 271,                     /* INT  */
-    VOID = 272,                    /* VOID  */
-    SOMA = 273,                    /* SOMA  */
-    MULT = 274,                    /* MULT  */
-    RELACIONAL = 275,              /* RELACIONAL  */
-    IF = 276,                      /* IF  */
-    ELSE = 277                     /* ELSE  */
+    INT = 260,                     /* INT  */
+    VOID = 261,                    /* VOID  */
+    PLUS = 262,                    /* PLUS  */
+    MINUS = 263,                   /* MINUS  */
+    MULT = 264,                    /* MULT  */
+    DIV = 265,                     /* DIV  */
+    RELACIONAL = 266,              /* RELACIONAL  */
+    OPN_PAR = 267,                 /* OPN_PAR  */
+    CLS_PAR = 268,                 /* CLS_PAR  */
+    OPN_CLC = 269,                 /* OPN_CLC  */
+    CLS_CLC = 270,                 /* CLS_CLC  */
+    OPN_CHA = 271,                 /* OPN_CHA  */
+    CLS_CHA = 272,                 /* CLS_CHA  */
+    PNT_VRG = 273,                 /* PNT_VRG  */
+    VRG = 274,                     /* VRG  */
+    EQ = 275,                      /* EQ  */
+    RETURN = 276,                  /* RETURN  */
+    WHILE = 277,                   /* WHILE  */
+    IF = 278,                      /* IF  */
+    ELSE = 279                     /* ELSE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 17 "parser.y"
+
+    struct Node *no; /* Todos os valores serão ponteiros para Node */
+
+#line 92 "parser.tab.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

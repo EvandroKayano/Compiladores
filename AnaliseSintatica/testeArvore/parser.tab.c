@@ -1405,12 +1405,12 @@ yyreduce:
 
   case 39: /* simples-expressao: soma-expressao relacional soma-expressao  */
 #line 99 "parser.y"
-    {
-      /* $2 é o nó do operador (<, ==, etc.). Vamos "promovê-lo" a pai */
-      (yyvsp[-1].no)->p1 = (yyvsp[-2].no); /* p1=lado esq */
-      (yyvsp[-1].no)->p2 = (yyvsp[0].no); /* p2=lado dir */
-      (yyval.no) = (yyvsp[-1].no);
-    }
+                    {
+                    /* $2 é o nó do operador (<, ==, etc.). Vamos "promovê-lo" a pai */
+                    (yyvsp[-1].no)->p1 = (yyvsp[-2].no); /* p1=lado esq */
+                    (yyvsp[-1].no)->p2 = (yyvsp[0].no); /* p2=lado dir */
+                    (yyval.no) = (yyvsp[-1].no);
+                    }
 #line 1415 "parser.tab.c"
     break;
 
@@ -1428,18 +1428,18 @@ yyreduce:
 
   case 42: /* soma-expressao: soma-expressao soma termo  */
 #line 110 "parser.y"
-    {
-      /* $2 é o nó do operador (+ ou -). Promove a pai */
-      (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
-      (yyvsp[-1].no)->p2 = (yyvsp[0].no);
-      (yyval.no) = (yyvsp[-1].no);
-    }
+                    {
+                    /* $2 é o nó do operador (+ ou -). Promove a pai */
+                    (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
+                    (yyvsp[-1].no)->p2 = (yyvsp[0].no);
+                    (yyval.no) = (yyvsp[-1].no);
+                    }
 #line 1438 "parser.tab.c"
     break;
 
   case 43: /* soma-expressao: termo  */
 #line 116 "parser.y"
-        { (yyval.no) = (yyvsp[0].no); }
+                          { (yyval.no) = (yyvsp[0].no); }
 #line 1444 "parser.tab.c"
     break;
 
@@ -1457,12 +1457,12 @@ yyreduce:
 
   case 46: /* termo: termo mult fator  */
 #line 122 "parser.y"
-    {
-      /* $2 é o nó do operador (* ou /). Promove a pai */
-      (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
-      (yyvsp[-1].no)->p2 = (yyvsp[0].no);
-      (yyval.no) = (yyvsp[-1].no);
-    }
+                    {
+                    /* $2 é o nó do operador (* ou /). Promove a pai */
+                    (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
+                    (yyvsp[-1].no)->p2 = (yyvsp[0].no);
+                    (yyval.no) = (yyvsp[-1].no);
+                    }
 #line 1467 "parser.tab.c"
     break;
 
@@ -1737,10 +1737,9 @@ yyreturnlab:
 
 int main(int argc, char *argv[]){
     FILE *f_in;
-if (argc == 2)
-    {
+if (argc == 2){
         if(!(f_in = fopen(argv[1],"r"))) {
-    perror(argv[0]);
+            perror(argv[0]);
             return 1;
         }
         yyin = f_in;
@@ -1749,17 +1748,16 @@ if (argc == 2)
         yyin = stdin;
     }
     
-    /* Chame o parser (que chama yylex() internamente) */
     yyparse(); 
 
     if (raiz_ast != NULL) {
         fprintf(stderr, "\nÁrvore Sintática Gerada com Sucesso.\n");
-        /* Descomente para imprimir a árvore (requer implementação no Passo 4) */
+
         print_arvore(raiz_ast, 0);
         
-        /* Libere a memória da árvore (requer implementação no Passo 4) */
         free_tree(raiz_ast);
-    } else {
+    } 
+    else {
         fprintf(stderr, "\nFalha ao gerar a Árvore Sintática.\n");
     }
 
