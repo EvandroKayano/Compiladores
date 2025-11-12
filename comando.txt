@@ -6,7 +6,15 @@ gcc lex.yy.c -o scanner
 
 NO PARSER (no MSYS MINGW)
 cd /c/Users/Kayano/Documents/GitHub/Compiladores/ProjetoFinal/parser
-cd /c/Users/Kayano/Documents/GitHub/Compiladores/AnaliseSintatica/testeArvore
+cd /c/Users/Kayano/Documents/GitHub/Compiladores/AnaliseSemantica/Semantic
+
+
+
+Se possui Makefile e estiver atualizado, rode:
+
+make run
+
+Senão:
 
 bison -d parser.y
 flex scanner.l
