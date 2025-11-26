@@ -1,0 +1,90 @@
+
+/* Teste léxico */
+
+/* int @variavelinvalida; */ 
+/* int valor$;             */
+
+
+
+
+/* Teste sintático */
+/*
+void funcaoquebrada(void) {
+    int a
+    a = 10;
+}
+*/
+/* ACIMA: Falta ponto e virgula apos 'int a' */
+
+
+
+
+/* Teste semântico */
+
+/* ERRO SEMANTICO 1: Variavel declarada como VOID (Global) */
+void varvoidglobal;
+
+
+int x;
+/* ERRO SEMANTICO 2: Redeclaracao de variavel Global */
+int x;
+
+/* Funcao auxiliar valida */
+int soma(int a, int b) {
+    return a + b;
+}
+
+void retornanada(void){ }
+
+/* ERRO SEMANTICO 3: Redeclaracao de Funcao (input ja eh built-in) */
+int input(void) {
+    return 0;
+}
+
+void testeerros(void) {
+    int local;
+    int vetor[10];
+    int va;
+
+    /* ERRO SEMANTICO 4: Variavel declarada como VOID (Local) */
+    void varvoidlocal;
+    
+    /* ERRO SEMANTICO 5: Redeclaracao de variavel Local */
+    int local;
+    
+    /* ERRO SEMANTICO 6: Uso de variavel nao declarada */
+    naoexiste = 10;
+    
+    /* ERRO SEMANTICO 7: Variavel simples usada como vetor */
+    local[0] = 1;
+    
+    /* ERRO SEMANTICO 8: Chamada de funcao nao declarada */
+    funcaofantasma();
+    
+    /* ERRO SEMANTICO 9: Variavel usada como chamada de funcao */
+    local();
+    
+    /* ERRO SEMANTICO (10 e 11) + 2 (função não atribui nada): Numero de argumentos invalido */
+    soma(1);        /* Esperado 2, Recebido 1 */
+    soma(1, 2, 3);  /* Esperado 2, Recebido 3 */
+    
+    /* ERRO SEMANTICO 12 e 13: Argumentos invalidos em funcoes built-in */
+    input(10);      /* input espera 0 */
+    output();       /* output espera 1 */
+
+    /* ERRO SEMANTICO 14: atribuição inválida */
+    va = retornanada();
+
+    /* ERRO SEMANTICO 15: int[] != int */
+    vetor = soma(1,2);
+    
+    /* ERRO SEMANTICO 16: chamada inválida, não atribui a nada */
+    soma(1,2);
+
+    return;
+}
+
+void main(void) {
+    int y;
+    y = soma(1, 2); 
+}

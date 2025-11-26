@@ -35,11 +35,13 @@ typedef struct Node {
     struct Node *p2;
     struct Node *p3;
     struct Node *p4;
+
+    int linha;
 } Node;
 
 Node *criar_no(Tipo_No tipo, Node *p1, Node *p2, Node *p3, Node *p4);
 Node *criar_folha_num(int valor);
-Node *criar_folha_id(char *valor);
+Node *criar_folha_id(char *valor, int linha);
 void print_arvore(Node *raiz, int level);
 void free_tree(Node *raiz);
 

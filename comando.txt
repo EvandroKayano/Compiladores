@@ -9,7 +9,6 @@ cd /c/Users/Kayano/Documents/GitHub/Compiladores/ProjetoFinal/parser
 cd /c/Users/Kayano/Documents/GitHub/Compiladores/AnaliseSemantica/Semantic
 
 
-
 Se possui Makefile e estiver atualizado, rode:
 
 make run

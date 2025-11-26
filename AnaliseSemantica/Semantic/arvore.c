@@ -9,6 +9,13 @@ Node *criar_no(Tipo_No tipo, Node *p1, Node *p2, Node *p3, Node *p4){
     no->p2 = p2;    
     no->p3 = p3;
     no->p4 = p4;
+
+    if (p1 != NULL) no->linha = p1->linha;
+    else if (p2 != NULL) no->linha = p2->linha;
+    else if (p3 != NULL) no->linha = p3->linha;
+    else if (p4 != NULL) no->linha = p4->linha;
+    else no->linha = -1;
+
     return no;
 }
 
@@ -21,20 +28,20 @@ Node *criar_folha_num(int valor){ // Cria uma folha para num
     return no;
 }
 
-Node *criar_folha_id(char *valor){ // Cria uma folha para id
+Node *criar_folha_id(char *valor, int linha){ // Cria uma folha para id
     Node *no = (Node *)malloc(sizeof(Node));
     no->tipo = NODE_ID;
     no->valor.id_val = valor;
+    no->linha = linha;
 
     no->p1 = no->p2 = no->p3 = no->p4 = NULL;
     return no;
 }
 
 static const char* get_node_label(Node *node) {
-    // Buffer estático para construir o label
     static char label[100]; 
     
-    // Pega o nome do tipo do nó (ex: "VAR_DECL")
+    // Nome que aparece na arvore
     const char *tipo_str;
     switch(node->tipo) {
         case NODE_PROGRAMA: tipo_str = "PROGRAMA"; break;
@@ -51,7 +58,12 @@ static const char* get_node_label(Node *node) {
         case NODE_MULT: tipo_str = "MULT"; break;
         case NODE_VAR: tipo_str = "VAR"; break;
         case NODE_CALLBACK: tipo_str = "CALLBACK"; break;
-        case NODE_ID: tipo_str = "ID"; break;
+        case NODE_ID: 
+            if(strcmp(node->valor.id_val,"int") == 0 || strcmp(node->valor.id_val,"void") == 0)
+                tipo_str = "TIPO";
+            else
+                tipo_str = "ID"; 
+            break;
         case NODE_NUM: tipo_str = "NUM"; break;
         default: tipo_str = "DESCONHECIDO";
     }
@@ -62,15 +74,12 @@ static const char* get_node_label(Node *node) {
         case NODE_RELACIONAL:
         case NODE_SOMA:
         case NODE_MULT:
-            // Formata como "TIPO (valor)"
             snprintf(label, sizeof(label), "%s (%s)", tipo_str, node->valor.id_val);
             break;
         case NODE_NUM:
-            // Formata como "TIPO (valor)"
             snprintf(label, sizeof(label), "%s (%d)", tipo_str, node->valor.num_val);
             break;
         default:
-            // Apenas usa o tipo
             snprintf(label, sizeof(label), "%s", tipo_str);
     }
     return label;
@@ -81,7 +90,7 @@ static void print_arvore_ascii_recursive(Node *node, char* prefix, int is_last) 
         return;
     }
 
-    // 1. Imprime o prefixo e o conector
+    // Enfeite
     printf("%s", prefix);
     if (is_last) {
         printf("└─ "); // "L" para o último filho
@@ -89,8 +98,12 @@ static void print_arvore_ascii_recursive(Node *node, char* prefix, int is_last) 
         printf("├─ "); // "T" para os outros
     }
 
-    // 2. Imprime o label do nó
-    printf("[%s]\n", get_node_label(node));
+    // Nome do nó
+    printf("[%s]", get_node_label(node));
+    if(node->tipo == NODE_ID && strcmp(node->valor.id_val,"int") && strcmp(node->valor.id_val, "void"))
+        printf(" (linha: %d)", node->linha);
+
+    printf("\n");
 
     // 3. Prepara o novo prefixo para os filhos
     char new_prefix[512];
@@ -115,7 +128,7 @@ static void print_arvore_ascii_recursive(Node *node, char* prefix, int is_last) 
 }
 
 void print_arvore(Node *raiz, int level){
-if (raiz == NULL) {
+    if (raiz == NULL) {
         return;
     }
     
