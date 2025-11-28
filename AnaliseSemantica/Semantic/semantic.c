@@ -121,7 +121,7 @@ void registrar_erro(int linha, const char *msg, ...){
 void imprimir_erros(){
     MensagemErro *atual = errors_init;
     while(atual != NULL){
-        fprintf(stderr, "Erro Semantico (Linha %d): %s\n", atual->linha, atual->mensagem);
+        printf( "Erro Semantico (Linha %d): %s\n", atual->linha, atual->mensagem);
         MensagemErro *aux = atual;
         atual = atual->prox;
         free(aux);
@@ -268,7 +268,7 @@ TipoDado ler_tipo(Node *node) {
         return s ? s->tipo : TIPO_ERRO;
     }
 
-    // 6. Atribuição (Retorna o tipo do lado direito ou esquerdo? Em C é o esquerdo)
+    // 6. Atribuição por função
     if (node->tipo == NODE_ASSIGN) {
         return ler_tipo(node->p1);
     }
@@ -354,13 +354,16 @@ void percorrer_arvore(Node *node, int usa_retorno) {
 
             Simbolo *s = buscar_simbolo(nome);
 
+            // se não encontrou a função
             if (s == NULL) {
                 registrar_erro(node->linha, "Função '%s' não declarada.", nome);
             } 
+            // se  encontrou, mas não é função
             else if (s->cat != FUNC) {
                 registrar_erro(node->linha, "Símbolo '%s' não é uma função.", nome);
             } 
-            else{ // verificação do número de argumentos
+            // verificando o número de argumentos
+            else{ 
                 int num_args = contar_args(node->p2);
                 if (num_args != s->num_params) {
                     registrar_erro(node->linha, "Chamada inválida p/ '%s'. Args esperados: %d, recebidos: %d.", nome, s->num_params, num_args);
@@ -451,7 +454,7 @@ void percorrer_arvore(Node *node, int usa_retorno) {
 
 int analise_semantica(Node *raiz_ast) {
     n_erros = 0;
-    fprintf(stderr, "\nIniciando Analise Semantica...\n");
+    printf( "\nIniciando Analise Semantica...\n");
 
     // 1 - inicia a pilha de escopos
     push_escopo("GLOBAL"); 
@@ -474,13 +477,12 @@ int analise_semantica(Node *raiz_ast) {
     // 5 - imprimir resultados
     if (n_erros == 0){
         // imprime a árvore pelo parser
-        fprintf(stderr, "Analise Semantica Concluida com Sucesso.\n");
-        // imprime a tabela de símbolos completa
+        printf( "Analise Semantica Concluida com Sucesso.\n");
         print_tabela();
     }    
     else {
+        printf( "Analise Semantica Concluida com %d erros.\n", n_erros);
         imprimir_erros();
-        fprintf(stderr, "Analise Semantica Concluida com %d erros.\n", n_erros);
     }    
     
     // 6 - libera a tabela de símbolos
