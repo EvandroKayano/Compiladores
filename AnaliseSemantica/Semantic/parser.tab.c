@@ -561,8 +561,8 @@ static const yytype_uint8 yyrline[] =
       62,    64,    66,    67,    69,    70,    72,    73,    75,    77,
       78,    80,    81,    83,    84,    85,    86,    87,    89,    90,
       92,    93,    95,    97,    98,   100,   101,   103,   104,   106,
-     113,   115,   117,   124,   126,   127,   129,   136,   138,   139,
-     141,   142,   143,   144,   146,   148,   149,   151,   152
+     113,   115,   117,   124,   126,   127,   129,   135,   137,   138,
+     140,   141,   142,   143,   145,   147,   148,   150,   151
 };
 #endif
 
@@ -1680,7 +1680,7 @@ yyreduce:
   case 39: /* simples-expressao: soma-expressao relacional soma-expressao  */
 #line 107 "parser.y"
                     {
-                    /* $2 é o nó do operador (<, ==, etc.). Vamos "promovê-lo" a pai */
+                    /* $2 é o relacional */
                     (yyvsp[-1].no)->p1 = (yyvsp[-2].no); /* p1=lado esq */
                     (yyvsp[-1].no)->p2 = (yyvsp[0].no); /* p2=lado dir */
                     (yyval.no) = (yyvsp[-1].no);
@@ -1703,7 +1703,7 @@ yyreduce:
   case 42: /* soma-expressao: soma-expressao soma termo  */
 #line 118 "parser.y"
                     {
-                    /* $2 é o nó do operador (+ ou -). Promove a pai */
+                    /* $2 é o operador */
                     (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
                     (yyvsp[-1].no)->p2 = (yyvsp[0].no);
                     (yyval.no) = (yyvsp[-1].no);
@@ -1732,88 +1732,87 @@ yyreduce:
   case 46: /* termo: termo mult fator  */
 #line 130 "parser.y"
                     {
-                    /* $2 é o nó do operador (* ou /). Promove a pai */
                     (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
                     (yyvsp[-1].no)->p2 = (yyvsp[0].no);
                     (yyval.no) = (yyvsp[-1].no);
                     }
-#line 1741 "parser.tab.c"
+#line 1740 "parser.tab.c"
     break;
 
   case 47: /* termo: fator  */
-#line 136 "parser.y"
+#line 135 "parser.y"
                           { (yyval.no) = (yyvsp[0].no); }
-#line 1747 "parser.tab.c"
+#line 1746 "parser.tab.c"
     break;
 
   case 48: /* mult: MULT  */
-#line 138 "parser.y"
+#line 137 "parser.y"
                          { (yyval.no) = (yyvsp[0].no); }
-#line 1753 "parser.tab.c"
+#line 1752 "parser.tab.c"
     break;
 
   case 49: /* mult: DIV  */
-#line 139 "parser.y"
+#line 138 "parser.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1759 "parser.tab.c"
+#line 1758 "parser.tab.c"
     break;
 
   case 50: /* fator: OPN_PAR expressao CLS_PAR  */
-#line 141 "parser.y"
+#line 140 "parser.y"
                                               { (yyval.no) = (yyvsp[-1].no); }
-#line 1765 "parser.tab.c"
+#line 1764 "parser.tab.c"
     break;
 
   case 51: /* fator: var  */
-#line 142 "parser.y"
+#line 141 "parser.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1771 "parser.tab.c"
+#line 1770 "parser.tab.c"
     break;
 
   case 52: /* fator: ativacao  */
-#line 143 "parser.y"
+#line 142 "parser.y"
                              { (yyval.no) = (yyvsp[0].no); }
-#line 1777 "parser.tab.c"
+#line 1776 "parser.tab.c"
     break;
 
   case 53: /* fator: NUM  */
-#line 144 "parser.y"
+#line 143 "parser.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1783 "parser.tab.c"
+#line 1782 "parser.tab.c"
     break;
 
   case 54: /* ativacao: ID OPN_PAR args CLS_PAR  */
-#line 146 "parser.y"
+#line 145 "parser.y"
                                             { (yyval.no) = criar_no(NODE_CALLBACK, (yyvsp[-3].no), (yyvsp[-1].no), NULL, NULL);}
-#line 1789 "parser.tab.c"
+#line 1788 "parser.tab.c"
     break;
 
   case 55: /* args: arg-lista  */
-#line 148 "parser.y"
+#line 147 "parser.y"
                               { (yyval.no) = (yyvsp[0].no); }
-#line 1795 "parser.tab.c"
+#line 1794 "parser.tab.c"
     break;
 
   case 56: /* args: %empty  */
-#line 149 "parser.y"
+#line 148 "parser.y"
                     { (yyval.no) = NULL; }
-#line 1801 "parser.tab.c"
+#line 1800 "parser.tab.c"
     break;
 
   case 57: /* arg-lista: arg-lista VRG expressao  */
-#line 151 "parser.y"
+#line 150 "parser.y"
                                             { (yyval.no) = criar_no(NODE_DECL_LISTA, (yyvsp[-2].no), (yyvsp[0].no), NULL, NULL);}
-#line 1807 "parser.tab.c"
+#line 1806 "parser.tab.c"
     break;
 
   case 58: /* arg-lista: expressao  */
-#line 152 "parser.y"
+#line 151 "parser.y"
                               { (yyval.no) = (yyvsp[0].no); }
-#line 1813 "parser.tab.c"
+#line 1812 "parser.tab.c"
     break;
 
 
-#line 1817 "parser.tab.c"
+#line 1816 "parser.tab.c"
 
       default: break;
     }
@@ -2037,7 +2036,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 154 "parser.y"
+#line 153 "parser.y"
 
 
 

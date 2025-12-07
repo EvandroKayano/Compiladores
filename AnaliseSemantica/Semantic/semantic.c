@@ -11,6 +11,18 @@ MensagemErro *errors_init = NULL;
 MensagemErro *errors_end = NULL;
 int n_erros = 0;
 
+
+int hash(char *nome){
+    unsigned long aux = 0;
+    int i = 0;
+    while (nome[i] != '\0') {
+        aux = ((aux << 4) + nome[i]) % HASH_SIZE;
+        ++i;
+    }
+    return (int)aux;
+}
+
+
 #pragma region tabela de simbolos
 
 TabelaSimbolos *tabela_inicio = NULL;
@@ -18,7 +30,7 @@ TabelaSimbolos *tabela_fim = NULL;
 int count = 1;
 
 //  poe o simbolo na tabela de símbolos
-void add_tabela(char *nome, char *escopo, TipoDado tipo, Categoria cat, int linha) {
+void add_tabela(char *nome, char *escopo, TipoDado tipo, Categoria cat, int linha, int hash_index) {
     TabelaSimbolos *novo = (TabelaSimbolos *)malloc(sizeof(TabelaSimbolos));
     
     novo->id_entrada = count++;
@@ -26,8 +38,9 @@ void add_tabela(char *nome, char *escopo, TipoDado tipo, Categoria cat, int linh
     novo->escopo = strdup(escopo);
     novo->linha = linha;
     novo->prox = NULL;
+    novo->hash_index = hash_index;
 
-    // converte o enum para string
+    // enum -> string
     if (cat == VAR) novo->cat = strdup("var");
     else if (cat == VET) novo->cat = strdup("vet");
     else novo->cat = strdup("fun");
@@ -46,21 +59,24 @@ void add_tabela(char *nome, char *escopo, TipoDado tipo, Categoria cat, int linh
     }
 }
 
-// imprime a tabela de símbolos completa
+
 void print_tabela() {
     printf("\n\n");
-    printf("==================================================================================\n");
-    printf("                                TABELA DE SIMBOLOS                                \n");
-    printf("==================================================================================\n");
-    // Cabeçalho alinhado
-    printf("| %-7s | %-15s | %-15s | %-8s | %-9s | %-6s |\n", 
-           "ENTRADA", "NOME ID", "ESCOPO", "TIPO ID", "TIPO DADO", "LINHA");
-    printf("|---------|-----------------|-----------------|----------|-----------|--------|\n");
+    printf("==========================================================================================\n");
+    printf("                                    TABELA DE SIMBOLOS                                    \n");
+    printf("==========================================================================================\n");
+    
+    // formatação
+    printf("| %-7s | %-8s | %-15s | %-15s | %-8s | %-9s | %-6s |\n", 
+           "ENTRADA", "HASH KEY", "NOME ID", "ESCOPO", "TIPO ID", "TIPO DADO", "LINHA");
+    printf("|---------|----------|-----------------|-----------------|----------|-----------|--------|\n");
+
 
     TabelaSimbolos *atual = tabela_inicio;
     while (atual != NULL) {
-        printf("| %-7d | %-15s | %-15s | %-8s | %-9s | %-6d |\n", 
+        printf("| %-7d | %-8d | %-15s | %-15s | %-8s | %-9s | %-6d |\n", 
                atual->id_entrada, 
+               atual->hash_index,
                atual->nome, 
                atual->escopo, 
                atual->cat, 
@@ -69,7 +85,7 @@ void print_tabela() {
         
         atual = atual->prox;
     }
-    printf("==================================================================================\n");
+    printf("==========================================================================================\n");
 }
 
 
@@ -79,12 +95,11 @@ void free_tabela() {
         TabelaSimbolos *temp = atual;
         atual = atual->prox;
         
-        // Libera as strings duplicadas com strdup
         free(temp->nome);
         free(temp->escopo);
         free(temp->cat);
         free(temp->tipo);
-        free(temp); // Libera o nó
+        free(temp);
     }
     tabela_inicio = NULL;
     tabela_fim = NULL;
@@ -133,17 +148,6 @@ void imprimir_erros(){
 #pragma endregion
 
 
-int hash(char *nome){
-    unsigned long temp = 0;
-    int i = 0;
-    while (nome[i] != '\0') {
-        temp = ((temp << 4) + nome[i]) % HASH_SIZE;
-        ++i;
-    }
-    return (int)temp;
-}
-
-
 #pragma region escopos
 
 void push_escopo(char *nome){ 
@@ -168,8 +172,8 @@ void pop_escopo(){
                 Simbolo *temp = s;
                 s = s->prox;
                 
-                free(temp->nome); // libera o nome, por conta do strdup
-                free(temp);       // libera o struct Simbolo
+                free(temp->nome);
+                free(temp);
             }
         }
 
@@ -226,7 +230,7 @@ void add_simbolo(char *nome, TipoDado tipo, Categoria cat, int linha, int num_pa
     topo_pilha->hashes[index] = novo;
 
     // ao inserir o símbolo, também adiciona na tabela geral
-    add_tabela(nome, topo_pilha->nome_escopo, tipo, cat, linha);
+    add_tabela(nome, topo_pilha->nome_escopo, tipo, cat, linha, index);
 }
 
 #pragma endregion
@@ -276,7 +280,7 @@ TipoDado ler_tipo(Node *node) {
     return TIPO_ERRO; // Fallback seguro
 }
 
-// função para adicionar o numero de parametros para uma função
+// adiciona o numero de parametros para uma função
 int contar_parametros(Node *lista_parametros){
     if(lista_parametros == NULL) return 0; // lista vazia
     if(lista_parametros->tipo == NODE_VAR_DECL) return 1; // nó folha
@@ -286,7 +290,7 @@ int contar_parametros(Node *lista_parametros){
     return 0;
 }
 
-// função para verificar se a função foi chamada com o número certo de argumentos
+// verificaa se a função foi chamada com o número certo de argumentos
 int contar_args(Node *lista_args){
     if(lista_args == NULL) return 0; // lista vazia
     if(lista_args->tipo == NODE_DECL_LISTA){ // nó pai
@@ -294,6 +298,7 @@ int contar_args(Node *lista_args){
     }
     return 1; // não está vazio
 }
+
 
 void percorrer_arvore(Node *node, int usa_retorno) {
     if (node == NULL) return;

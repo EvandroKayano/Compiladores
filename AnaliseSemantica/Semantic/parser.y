@@ -105,7 +105,7 @@ var:                ID { $$ = criar_no(NODE_VAR, $1, NULL, NULL, NULL); } |
 
 simples-expressao:  soma-expressao relacional soma-expressao 
                     {
-                    /* $2 é o nó do operador (<, ==, etc.). Vamos "promovê-lo" a pai */
+                    /* $2 é o relacional */
                     $2->p1 = $1; /* p1=lado esq */
                     $2->p2 = $3; /* p2=lado dir */
                     $$ = $2;
@@ -116,7 +116,7 @@ relacional:         RELACIONAL { $$ = $1; };
 
 soma-expressao:     soma-expressao soma termo 
                     {
-                    /* $2 é o nó do operador (+ ou -). Promove a pai */
+                    /* $2 é o operador */
                     $2->p1 = $1;
                     $2->p2 = $3;
                     $$ = $2;
@@ -128,7 +128,6 @@ soma:               PLUS { $$ = $1; }|
 
 termo:              termo mult fator 
                     {
-                    /* $2 é o nó do operador (* ou /). Promove a pai */
                     $2->p1 = $1;
                     $2->p2 = $3;
                     $$ = $2;

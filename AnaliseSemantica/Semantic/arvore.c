@@ -19,7 +19,7 @@ Node *criar_no(Tipo_No tipo, Node *p1, Node *p2, Node *p3, Node *p4){
     return no;
 }
 
-Node *criar_folha_num(int valor){ // Cria uma folha para num
+Node *criar_folha_num(int valor){ // Cria uma folha do tipo num
     Node *no = (Node *)malloc(sizeof(Node));
     no->tipo = NODE_NUM;
     no->valor.num_val = valor;
@@ -28,7 +28,7 @@ Node *criar_folha_num(int valor){ // Cria uma folha para num
     return no;
 }
 
-Node *criar_folha_id(char *valor, int linha){ // Cria uma folha para id
+Node *criar_folha_id(char *valor, int linha){ // Cria uma folha do tipo id
     Node *no = (Node *)malloc(sizeof(Node));
     no->tipo = NODE_ID;
     no->valor.id_val = valor;
@@ -183,3 +183,4 @@ void free_tree(Node *raiz){
     /* Finalmente, libere o próprio nó */
     free(raiz);
 }
+

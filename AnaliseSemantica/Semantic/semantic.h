@@ -34,6 +34,7 @@ typedef struct TabelaSimbolos {
     char *cat;           // "var", "fun", "param"
     char *tipo;          // "int", "void"
     int linha;           // Linha de declaração
+    int hash_index;      // Índice na tabela hash
     struct TabelaSimbolos *prox;
 } TabelaSimbolos;
 
