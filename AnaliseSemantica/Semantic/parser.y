@@ -18,8 +18,6 @@ extern int yylineno;
 extern int erro_lexico;
 %}
 
-
-
 %union {
     struct Node *no; /* Todos os valores serão ponteiros para Node */
 }
@@ -186,9 +184,17 @@ if (argc == 2){
             free_tree(raiz_ast);
         }
     } 
-    else {
+    else if(resultado_parse == 1){
 
-        fprintf(stderr, "\nCompilacao abortada devido a erros.\n");
+        fprintf(stderr, "\nCompilacao abortada devido a erros sintáticos.\n");
+    }
+    else if(erro_lexico == 1){
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros sintáticos.\n");
+    }
+    else{
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros não previstos.\n");
     }
 
     if (f_in) fclose(f_in);

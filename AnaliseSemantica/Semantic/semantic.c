@@ -241,7 +241,7 @@ void add_simbolo(char *nome, TipoDado tipo, Categoria cat, int linha, int num_pa
 TipoDado ler_tipo(Node *node) {
     if (node == NULL) return TIPO_ERRO; 
 
-    // 1. Tipos primitivos (usados em declarações)
+    // tipos primitivos (usados em declarações)
     if (node->tipo == NODE_ID) {
         if (strcmp(node->valor.id_val, "void") == 0) return TIPO_VOID;
         if (strcmp(node->valor.id_val, "int") == 0) return TIPO_INT;
@@ -249,15 +249,15 @@ TipoDado ler_tipo(Node *node) {
         return TIPO_ERRO; 
     }
 
-    // 2. Números literais
+    // números literais
     if (node->tipo == NODE_NUM) return TIPO_INT;
 
-    // 3. Operações matemáticas (Sempre resultam em INT)
+    // operações matemáticas (Sempre resultam em INT)
     // Mesmo que os operandos estejam errados, o resultado da soma "seria" int
     if (node->tipo == NODE_SOMA || node->tipo == NODE_MULT) return TIPO_INT;
     if (node->tipo == NODE_RELACIONAL) return TIPO_INT; // Em C, true/false é 1/0 (int)
 
-    // 4. Variáveis: Buscamos na tabela
+    // variáveis: Buscamos na tabela
     if (node->tipo == NODE_VAR) {
         if (node->p1 == NULL) return TIPO_ERRO;
         Simbolo *s = buscar_simbolo(node->p1->valor.id_val);
@@ -265,19 +265,19 @@ TipoDado ler_tipo(Node *node) {
         return s ? s->tipo : TIPO_ERRO; 
     }
 
-    // 5. Chamadas de Função
+    // chamadas de Função
     if (node->tipo == NODE_CALLBACK) {
         if (node->p1 == NULL) return TIPO_ERRO;
         Simbolo *s = buscar_simbolo(node->p1->valor.id_val);
         return s ? s->tipo : TIPO_ERRO;
     }
 
-    // 6. Atribuição por função
+    // atribuição por função
     if (node->tipo == NODE_ASSIGN) {
         return ler_tipo(node->p1);
     }
 
-    return TIPO_ERRO; // Fallback seguro
+    return TIPO_ERRO;
 }
 
 // adiciona o numero de parametros para uma função
@@ -330,6 +330,7 @@ void percorrer_arvore(Node *node, int usa_retorno) {
             
             add_simbolo(nome, tipo, FUNC, node->linha, num_params);
             push_escopo(nome);
+            //
             percorrer_arvore(node->p3, 0);
             percorrer_arvore(node->p4, 0);
             pop_escopo();
@@ -402,7 +403,7 @@ void percorrer_arvore(Node *node, int usa_retorno) {
 
             TipoDado tipo_dir = ler_tipo(node->p2); 
             if (tipo_dir == TIPO_VOID) {
-                 registrar_erro(node->linha, "Atribuicao invalida. Expressao retorna VOID.");
+                 registrar_erro(node->linha, "Atribuicao invalida. Expressao '%s' retorna VOID.", node->p2->p1->valor.id_val);
             }
             break;
         }   

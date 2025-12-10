@@ -10,8 +10,8 @@
 /* Teste sintático */
 /*
 void funcaoquebrada(void) {
-    int a
-    a = 10;
+    int aa
+    aa = 10;
 }
 */
 /* ACIMA: Falta ponto e virgula apos 'int a' */

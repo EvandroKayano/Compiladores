@@ -46,13 +46,14 @@ DIV             \/
 ","                         { yylval.no = NULL; return VRG; }
 "="                         { yylval.no = NULL; return EQ; }
 
-"/*"([^*]|\*+[^*/])*"\*/" { }
-[ \t\n]+
-[[:space:]]+ /*Funciona OK?*/
+"/*"([^*]|\*+[^*/])*"\*/"   { }
+[ \t\n\r]+
+[[:space:]]+ 
 
-. { 
+
+[^ \t\n\r()\[\]{};,=+*\/<>=!-]+ { /* Qualquer outra coisa */
     erro_lexico = 1;
-    fprintf(stderr, "Erro Lexico (Linha %d): Caractere invalido '%s'\n", yylineno, yytext);
+    fprintf(stderr, "Erro Lexico (Linha %d): Lexema invalido '%s'\n", yylineno, yytext);
 }
 
 %% 
