@@ -1,8 +1,10 @@
 %option noyywrap
+%option yylineno
 %{
 #include "arvore.h"
 #include "parser.tab.h"
 #include<string.h>
+int erro_lexico = 0;
 %}
 
 DIGITO          [0-9]             
@@ -17,22 +19,22 @@ DIV             \/
 
 %%
 
-"int"                       { yylval.no = criar_folha_id(strdup("int")); return INT; }
-"void"                      { yylval.no = criar_folha_id(strdup("void")); return VOID; }
+"int"                       { yylval.no = criar_folha_id(strdup("int"),yylineno); return INT; }
+"void"                      { yylval.no = criar_folha_id(strdup("void"),yylineno); return VOID; }
 
 "return"                    { yylval.no = NULL; return RETURN; }
 "while"                     { yylval.no = NULL; return WHILE; }
 "if"                        { yylval.no = NULL; return IF; }
 "else"                      { yylval.no = NULL; return ELSE; }
 
-{PLUS}                      { yylval.no = criar_folha_id(strdup(yytext)); yylval.no->tipo = NODE_SOMA; return PLUS; }
-{MINUS}                     { yylval.no = criar_folha_id(strdup(yytext)); yylval.no->tipo = NODE_SOMA; return MINUS; }
-{MULT}                      { yylval.no = criar_folha_id(strdup(yytext)); yylval.no->tipo = NODE_MULT; return MULT; }
-{DIV}                       { yylval.no = criar_folha_id(strdup(yytext)); yylval.no->tipo = NODE_MULT; return DIV; }
-"<"|"<="|">"|">="|"=="|"!=" { yylval.no = criar_folha_id(strdup(yytext)); yylval.no->tipo = NODE_RELACIONAL; return RELACIONAL; }
+{PLUS}                      { yylval.no = criar_folha_id(strdup(yytext),yylineno); yylval.no->tipo = NODE_SOMA; return PLUS; }
+{MINUS}                     { yylval.no = criar_folha_id(strdup(yytext),yylineno); yylval.no->tipo = NODE_SOMA; return MINUS; }
+{MULT}                      { yylval.no = criar_folha_id(strdup(yytext),yylineno); yylval.no->tipo = NODE_MULT; return MULT; }
+{DIV}                       { yylval.no = criar_folha_id(strdup(yytext),yylineno); yylval.no->tipo = NODE_MULT; return DIV; }
+"<"|"<="|">"|">="|"=="|"!=" { yylval.no = criar_folha_id(strdup(yytext),yylineno); yylval.no->tipo = NODE_RELACIONAL; return RELACIONAL; }
 
 {NUM}                       { yylval.no = criar_folha_num(atoi(yytext)); return NUM; }
-{ID}                        { yylval.no = criar_folha_id(strdup(yytext)); return ID; }
+{ID}                        { yylval.no = criar_folha_id(strdup(yytext), yylineno); return ID; }
 
 "("                         { yylval.no = NULL; return OPN_PAR; }
 ")"                         { yylval.no = NULL; return CLS_PAR; }
@@ -44,11 +46,15 @@ DIV             \/
 ","                         { yylval.no = NULL; return VRG; }
 "="                         { yylval.no = NULL; return EQ; }
 
-"/*"([^*]|\*+[^*/])*"\*/" { }
-[ \t\n]+
-[[:space:]]+ /*Funciona OK?*/
+"/*"([^*]|\*+[^*/])*"\*/"   { }
+[ \t\n\r]+
+[[:space:]]+ 
 
-. printf("Caractere não pertence à linguagem C-: '%s'\n", yytext);
+
+[^ \t\n\r()\[\]{};,=+*\/<>=!-]+ { /* Qualquer outra coisa */
+    erro_lexico = 1;
+    fprintf(stderr, "Erro Lexico (Linha %d): Lexema invalido '%s'\n", yylineno, yytext);
+}
 
 %% 
 

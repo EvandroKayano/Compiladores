@@ -5,8 +5,6 @@ gcc lex.yy.c -o scanner
 ./scanner [sort.txt] // opcional passar o arquivo
 
 NO PARSER (no MSYS MINGW)
-cd /c/Users/Kayano/Documents/GitHub/Compiladores/ProjetoFinal/parser
-cd /c/Users/Kayano/Documents/GitHub/Compiladores/AnaliseSemantica/Semantic
 
 
 Se possui Makefile e estiver atualizado, rode:

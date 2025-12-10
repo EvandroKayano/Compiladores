@@ -1,33 +1,40 @@
 # Nome do compilador
 CC=gcc
+
+# Flags de compilação (Opcional, mas recomendado para ver erros)
+# -g: gera informações de debug (útil para gdb/valgrind)
+# -Wall: mostra todos os avisos (warnings)
+CFLAGS=-g -Wall
+
 # O nome do seu executável final
 EXECUTAVEL=parser
 
-# Arquivos fonte gerados e o seu código
-FONTES=parser.tab.c lex.yy.c arvore.c
+# Arquivos fonte (ADICIONADO: semantic.c)
+FONTES=parser.tab.c lex.yy.c arvore.c semantic.c
 
-# Target principal: o que 'make' faz por padrão
+# Target principal
 all: $(EXECUTAVEL)
 
 # Target 'run': compila e executa
 run: $(EXECUTAVEL)
-	./$(EXECUTAVEL) sort.txt
+	./$(EXECUTAVEL) sort_test.txt
 
-# Regra para criar o executável:
-# Ele depende dos arquivos listados em FONTES
+# Regra para criar o executável
+# O '$@' representa o nome do target (parser)
+# O '$^' representa todas as dependências (os fontes)
 $(EXECUTAVEL): $(FONTES)
-	$(CC) -o $(EXECUTAVEL) $(FONTES)
+	$(CC) $(CFLAGS) -o $@ $^
 
-# Regra para criar o parser.tab.c (do Bison)
-# Ele depende do parser.y
-parser.tab.c: parser.y
+# Regra do Bison
+# Gera tanto o .c quanto o .h
+parser.tab.c parser.tab.h: parser.y
 	bison -d parser.y
 
-# Regra para criar o lex.yy.c (do Flex)
-# Ele depende do scanner.l
-lex.yy.c: scanner.l
+# Regra do Flex
+# Ele depende do parser.tab.h porque o scanner.l faz #include "parser.tab.h"
+lex.yy.c: scanner.l parser.tab.h
 	flex scanner.l
 
-# Target 'clean': apaga os arquivos gerados para limpar o diretório
+# Target 'clean'
 clean:
 	rm -f $(EXECUTAVEL) parser.tab.c parser.tab.h lex.yy.c

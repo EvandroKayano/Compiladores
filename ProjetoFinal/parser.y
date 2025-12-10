@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include "arvore.h"
+#include "semantic.h"
 
 int yyparser(void);
 int yylex(void);
@@ -12,11 +13,16 @@ int yywrap(){
 void yyerror(const char *s);
 Node *raiz_ast = NULL;
 extern FILE *yyin;
+extern int yylineno;
+
+extern int erro_lexico;
 %}
 
 %union {
     struct Node *no; /* Todos os valores serão ponteiros para Node */
 }
+
+%define parse.error verbose
 
 /*   Tokens   */
 
@@ -62,7 +68,7 @@ param-lista:        param-lista VRG param { $$ = criar_no(NODE_DECL_LISTA, $1, $
                     param { $$ = $1; };
 
 param:              tipo-especificador ID { $$ = criar_no(NODE_VAR_DECL, $1, $2, NULL, NULL); }| 
-                    tipo-especificador ID OPN_CLC CLS_CLC { $$ = criar_no(NODE_VAR_DECL, $1, $2, criar_folha_id(strdup("[]")), NULL); };
+                    tipo-especificador ID OPN_CLC CLS_CLC { $$ = criar_no(NODE_VAR_DECL, $1, $2, criar_folha_id(strdup("[]"), yylineno), NULL); };
 
 composto-decl:      OPN_CHA local-declaracoes statement-lista CLS_CHA { $$ = criar_no(NODE_COMPOSTO_DECL, $2, $3, NULL, NULL);};
 
@@ -97,7 +103,7 @@ var:                ID { $$ = criar_no(NODE_VAR, $1, NULL, NULL, NULL); } |
 
 simples-expressao:  soma-expressao relacional soma-expressao 
                     {
-                    /* $2 é o nó do operador (<, ==, etc.). Vamos "promovê-lo" a pai */
+                    /* $2 é o relacional */
                     $2->p1 = $1; /* p1=lado esq */
                     $2->p2 = $3; /* p2=lado dir */
                     $$ = $2;
@@ -108,7 +114,7 @@ relacional:         RELACIONAL { $$ = $1; };
 
 soma-expressao:     soma-expressao soma termo 
                     {
-                    /* $2 é o nó do operador (+ ou -). Promove a pai */
+                    /* $2 é o operador */
                     $2->p1 = $1;
                     $2->p2 = $3;
                     $$ = $2;
@@ -120,7 +126,6 @@ soma:               PLUS { $$ = $1; }|
 
 termo:              termo mult fator 
                     {
-                    /* $2 é o nó do operador (* ou /). Promove a pai */
                     $2->p1 = $1;
                     $2->p2 = $3;
                     $$ = $2;
@@ -145,6 +150,7 @@ arg-lista:          arg-lista VRG expressao { $$ = criar_no(NODE_DECL_LISTA, $1,
 
 %%
 
+
 int main(int argc, char *argv[]){
     FILE *f_in;
 if (argc == 2){
@@ -157,18 +163,38 @@ if (argc == 2){
     else {
         yyin = stdin;
     }
-    
-    yyparse(); 
 
-    if (raiz_ast != NULL) {
-        fprintf(stderr, "\nÁrvore Sintática Gerada com Sucesso.\n");
+    int resultado_parse = yyparse();
 
-        print_arvore(raiz_ast, 0);
-        
-        free_tree(raiz_ast);
+    if (resultado_parse == 0 && erro_lexico == 0) {
+        if (raiz_ast != NULL) {
+
+            int erros = analise_semantica(raiz_ast);
+            if(erros == 0){
+
+                printf("\nCódigo sem erros léxicos, sintáticos ou semânticos!\n");
+
+                printf("\nÁrvore Sintática Gerada com Sucesso.\n");
+                print_arvore(raiz_ast, 0);
+            }
+            else{
+                printf("\nArvore suprimida devido a erros semanticos.\n");
+            }
+
+            free_tree(raiz_ast);
+        }
     } 
-    else {
-        fprintf(stderr, "\nFalha ao gerar a Árvore Sintática.\n");
+    else if(resultado_parse == 1){
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros sintáticos.\n");
+    }
+    else if(erro_lexico == 1){
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros sintáticos.\n");
+    }
+    else{
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros não previstos.\n");
     }
 
     if (f_in) fclose(f_in);
@@ -177,5 +203,5 @@ if (argc == 2){
 }
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro de sintaxe: %s\n", s);
+    fprintf(stderr, "Erro Sintatico (Linha %d): %s\n", yylineno, s);
 }

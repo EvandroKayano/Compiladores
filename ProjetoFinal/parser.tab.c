@@ -73,6 +73,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include "arvore.h"
+#include "semantic.h"
 
 int yyparser(void);
 int yylex(void);
@@ -82,8 +83,11 @@ int yywrap(){
 void yyerror(const char *s);
 Node *raiz_ast = NULL;
 extern FILE *yyin;
+extern int yylineno;
 
-#line 87 "parser.tab.c"
+extern int erro_lexico;
+
+#line 91 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -363,7 +367,7 @@ typedef int yy_state_fast_t;
 
 #define YY_ASSERT(E) ((void) (0 && (E)))
 
-#if !defined yyoverflow
+#if 1
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -428,7 +432,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* !defined yyoverflow */
+#endif /* 1 */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
@@ -553,19 +557,19 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    42,    42,    44,    45,    47,    48,    50,    51,    53,
-      54,    56,    58,    59,    61,    62,    64,    65,    67,    69,
-      70,    72,    73,    75,    76,    77,    78,    79,    81,    82,
-      84,    85,    87,    89,    90,    92,    93,    95,    96,    98,
-     105,   107,   109,   116,   118,   119,   121,   128,   130,   131,
-     133,   134,   135,   136,   138,   140,   141,   143,   144
+       0,    48,    48,    50,    51,    53,    54,    56,    57,    59,
+      60,    62,    64,    65,    67,    68,    70,    71,    73,    75,
+      76,    78,    79,    81,    82,    83,    84,    85,    87,    88,
+      90,    91,    93,    95,    96,    98,    99,   101,   102,   104,
+     111,   113,   115,   122,   124,   125,   127,   133,   135,   136,
+     138,   139,   140,   141,   143,   145,   146,   148,   149
 };
 #endif
 
 /** Accessing symbol of state STATE.  */
 #define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
 
-#if YYDEBUG || 0
+#if 1
 /* The user-facing name of the symbol whose (internal) number is
    YYSYMBOL.  No bounds checking.  */
 static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
@@ -901,8 +905,275 @@ int yydebug;
 #endif
 
 
+/* Context of a parse error.  */
+typedef struct
+{
+  yy_state_t *yyssp;
+  yysymbol_kind_t yytoken;
+} yypcontext_t;
+
+/* Put in YYARG at most YYARGN of the expected tokens given the
+   current YYCTX, and return the number of tokens stored in YYARG.  If
+   YYARG is null, return the number of expected tokens (guaranteed to
+   be less than YYNTOKENS).  Return YYENOMEM on memory exhaustion.
+   Return 0 if there are more than YYARGN expected tokens, yet fill
+   YYARG up to YYARGN. */
+static int
+yypcontext_expected_tokens (const yypcontext_t *yyctx,
+                            yysymbol_kind_t yyarg[], int yyargn)
+{
+  /* Actual size of YYARG. */
+  int yycount = 0;
+  int yyn = yypact[+*yyctx->yyssp];
+  if (!yypact_value_is_default (yyn))
+    {
+      /* Start YYX at -YYN if negative to avoid negative indexes in
+         YYCHECK.  In other words, skip the first -YYN actions for
+         this state because they are default actions.  */
+      int yyxbegin = yyn < 0 ? -yyn : 0;
+      /* Stay within bounds of both yycheck and yytname.  */
+      int yychecklim = YYLAST - yyn + 1;
+      int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+      int yyx;
+      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+        if (yycheck[yyx + yyn] == yyx && yyx != YYSYMBOL_YYerror
+            && !yytable_value_is_error (yytable[yyx + yyn]))
+          {
+            if (!yyarg)
+              ++yycount;
+            else if (yycount == yyargn)
+              return 0;
+            else
+              yyarg[yycount++] = YY_CAST (yysymbol_kind_t, yyx);
+          }
+    }
+  if (yyarg && yycount == 0 && 0 < yyargn)
+    yyarg[0] = YYSYMBOL_YYEMPTY;
+  return yycount;
+}
 
 
+
+
+#ifndef yystrlen
+# if defined __GLIBC__ && defined _STRING_H
+#  define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
+# else
+/* Return the length of YYSTR.  */
+static YYPTRDIFF_T
+yystrlen (const char *yystr)
+{
+  YYPTRDIFF_T yylen;
+  for (yylen = 0; yystr[yylen]; yylen++)
+    continue;
+  return yylen;
+}
+# endif
+#endif
+
+#ifndef yystpcpy
+# if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
+#  define yystpcpy stpcpy
+# else
+/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
+   YYDEST.  */
+static char *
+yystpcpy (char *yydest, const char *yysrc)
+{
+  char *yyd = yydest;
+  const char *yys = yysrc;
+
+  while ((*yyd++ = *yys++) != '\0')
+    continue;
+
+  return yyd - 1;
+}
+# endif
+#endif
+
+#ifndef yytnamerr
+/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
+   quotes and backslashes, so that it's suitable for yyerror.  The
+   heuristic is that double-quoting is unnecessary unless the string
+   contains an apostrophe, a comma, or backslash (other than
+   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
+   null, do not copy; instead, return the length of what the result
+   would have been.  */
+static YYPTRDIFF_T
+yytnamerr (char *yyres, const char *yystr)
+{
+  if (*yystr == '"')
+    {
+      YYPTRDIFF_T yyn = 0;
+      char const *yyp = yystr;
+      for (;;)
+        switch (*++yyp)
+          {
+          case '\'':
+          case ',':
+            goto do_not_strip_quotes;
+
+          case '\\':
+            if (*++yyp != '\\')
+              goto do_not_strip_quotes;
+            else
+              goto append;
+
+          append:
+          default:
+            if (yyres)
+              yyres[yyn] = *yyp;
+            yyn++;
+            break;
+
+          case '"':
+            if (yyres)
+              yyres[yyn] = '\0';
+            return yyn;
+          }
+    do_not_strip_quotes: ;
+    }
+
+  if (yyres)
+    return yystpcpy (yyres, yystr) - yyres;
+  else
+    return yystrlen (yystr);
+}
+#endif
+
+
+static int
+yy_syntax_error_arguments (const yypcontext_t *yyctx,
+                           yysymbol_kind_t yyarg[], int yyargn)
+{
+  /* Actual size of YYARG. */
+  int yycount = 0;
+  /* There are many possibilities here to consider:
+     - If this state is a consistent state with a default action, then
+       the only way this function was invoked is if the default action
+       is an error action.  In that case, don't check for expected
+       tokens because there are none.
+     - The only way there can be no lookahead present (in yychar) is if
+       this state is a consistent state with a default action.  Thus,
+       detecting the absence of a lookahead is sufficient to determine
+       that there is no unexpected or expected token to report.  In that
+       case, just report a simple "syntax error".
+     - Don't assume there isn't a lookahead just because this state is a
+       consistent state with a default action.  There might have been a
+       previous inconsistent state, consistent state with a non-default
+       action, or user semantic action that manipulated yychar.
+     - Of course, the expected token list depends on states to have
+       correct lookahead information, and it depends on the parser not
+       to perform extra reductions after fetching a lookahead from the
+       scanner and before detecting a syntax error.  Thus, state merging
+       (from LALR or IELR) and default reductions corrupt the expected
+       token list.  However, the list is correct for canonical LR with
+       one exception: it will still contain any token that will not be
+       accepted due to an error action in a later state.
+  */
+  if (yyctx->yytoken != YYSYMBOL_YYEMPTY)
+    {
+      int yyn;
+      if (yyarg)
+        yyarg[yycount] = yyctx->yytoken;
+      ++yycount;
+      yyn = yypcontext_expected_tokens (yyctx,
+                                        yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+      if (yyn == YYENOMEM)
+        return YYENOMEM;
+      else
+        yycount += yyn;
+    }
+  return yycount;
+}
+
+/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
+   about the unexpected token YYTOKEN for the state stack whose top is
+   YYSSP.
+
+   Return 0 if *YYMSG was successfully written.  Return -1 if *YYMSG is
+   not large enough to hold the message.  In that case, also set
+   *YYMSG_ALLOC to the required number of bytes.  Return YYENOMEM if the
+   required number of bytes is too large to store.  */
+static int
+yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
+                const yypcontext_t *yyctx)
+{
+  enum { YYARGS_MAX = 5 };
+  /* Internationalized format string. */
+  const char *yyformat = YY_NULLPTR;
+  /* Arguments of yyformat: reported tokens (one for the "unexpected",
+     one per "expected"). */
+  yysymbol_kind_t yyarg[YYARGS_MAX];
+  /* Cumulated lengths of YYARG.  */
+  YYPTRDIFF_T yysize = 0;
+
+  /* Actual size of YYARG. */
+  int yycount = yy_syntax_error_arguments (yyctx, yyarg, YYARGS_MAX);
+  if (yycount == YYENOMEM)
+    return YYENOMEM;
+
+  switch (yycount)
+    {
+#define YYCASE_(N, S)                       \
+      case N:                               \
+        yyformat = S;                       \
+        break
+    default: /* Avoid compiler warnings. */
+      YYCASE_(0, YY_("syntax error"));
+      YYCASE_(1, YY_("syntax error, unexpected %s"));
+      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
+      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+#undef YYCASE_
+    }
+
+  /* Compute error message size.  Don't count the "%s"s, but reserve
+     room for the terminator.  */
+  yysize = yystrlen (yyformat) - 2 * yycount + 1;
+  {
+    int yyi;
+    for (yyi = 0; yyi < yycount; ++yyi)
+      {
+        YYPTRDIFF_T yysize1
+          = yysize + yytnamerr (YY_NULLPTR, yytname[yyarg[yyi]]);
+        if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
+          yysize = yysize1;
+        else
+          return YYENOMEM;
+      }
+  }
+
+  if (*yymsg_alloc < yysize)
+    {
+      *yymsg_alloc = 2 * yysize;
+      if (! (yysize <= *yymsg_alloc
+             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
+        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
+      return -1;
+    }
+
+  /* Avoid sprintf, as that infringes on the user's name space.
+     Don't have undefined behavior even if the translation
+     produced a string with the wrong number of "%s"s.  */
+  {
+    char *yyp = *yymsg;
+    int yyi = 0;
+    while ((*yyp = *yyformat) != '\0')
+      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
+        {
+          yyp += yytnamerr (yyp, yytname[yyarg[yyi++]]);
+          yyformat += 2;
+        }
+      else
+        {
+          ++yyp;
+          ++yyformat;
+        }
+  }
+  return 0;
+}
 
 
 /*-----------------------------------------------.
@@ -971,7 +1242,10 @@ yyparse (void)
      action routines.  */
   YYSTYPE yyval;
 
-
+  /* Buffer for error messages, and its allocated size.  */
+  char yymsgbuf[128];
+  char *yymsg = yymsgbuf;
+  YYPTRDIFF_T yymsg_alloc = sizeof yymsgbuf;
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
 
@@ -1182,364 +1456,363 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* programa: declaracao-lista  */
-#line 42 "parser.y"
+#line 48 "parser.y"
                                      { raiz_ast = (yyvsp[0].no); (yyval.no) = (yyvsp[0].no); }
-#line 1188 "parser.tab.c"
+#line 1462 "parser.tab.c"
     break;
 
   case 3: /* declaracao-lista: declaracao-lista declaracao  */
-#line 44 "parser.y"
+#line 50 "parser.y"
                                                 { (yyval.no) = criar_no(NODE_DECL_LISTA, (yyvsp[-1].no), (yyvsp[0].no), NULL, NULL); }
-#line 1194 "parser.tab.c"
+#line 1468 "parser.tab.c"
     break;
 
   case 4: /* declaracao-lista: declaracao  */
-#line 45 "parser.y"
+#line 51 "parser.y"
                                { (yyval.no) = (yyvsp[0].no); }
-#line 1200 "parser.tab.c"
+#line 1474 "parser.tab.c"
     break;
 
   case 5: /* declaracao: var-declaracao  */
-#line 47 "parser.y"
+#line 53 "parser.y"
                                    { (yyval.no) = (yyvsp[0].no); }
-#line 1206 "parser.tab.c"
+#line 1480 "parser.tab.c"
     break;
 
   case 6: /* declaracao: fun-declaracao  */
-#line 48 "parser.y"
+#line 54 "parser.y"
                                    { (yyval.no) = (yyvsp[0].no); }
-#line 1212 "parser.tab.c"
+#line 1486 "parser.tab.c"
     break;
 
   case 7: /* var-declaracao: tipo-especificador ID PNT_VRG  */
-#line 50 "parser.y"
+#line 56 "parser.y"
                                                   { (yyval.no) = criar_no(NODE_VAR_DECL, (yyvsp[-2].no), (yyvsp[-1].no), NULL, NULL); }
-#line 1218 "parser.tab.c"
+#line 1492 "parser.tab.c"
     break;
 
   case 8: /* var-declaracao: tipo-especificador ID OPN_CLC NUM CLS_CLC PNT_VRG  */
-#line 51 "parser.y"
+#line 57 "parser.y"
                                                                       { (yyval.no) = criar_no(NODE_VAR_DECL, (yyvsp[-5].no), (yyvsp[-4].no), (yyvsp[-2].no), NULL); }
-#line 1224 "parser.tab.c"
+#line 1498 "parser.tab.c"
     break;
 
   case 9: /* tipo-especificador: INT  */
-#line 53 "parser.y"
+#line 59 "parser.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1230 "parser.tab.c"
+#line 1504 "parser.tab.c"
     break;
 
   case 10: /* tipo-especificador: VOID  */
-#line 54 "parser.y"
+#line 60 "parser.y"
                          { (yyval.no) = (yyvsp[0].no);}
-#line 1236 "parser.tab.c"
+#line 1510 "parser.tab.c"
     break;
 
   case 11: /* fun-declaracao: tipo-especificador ID OPN_PAR params CLS_PAR composto-decl  */
-#line 56 "parser.y"
+#line 62 "parser.y"
                                                                                { (yyval.no) = criar_no(NODE_FUN_DECL, (yyvsp[-5].no), (yyvsp[-4].no), (yyvsp[-2].no), (yyvsp[0].no));}
-#line 1242 "parser.tab.c"
+#line 1516 "parser.tab.c"
     break;
 
   case 12: /* params: param-lista  */
-#line 58 "parser.y"
+#line 64 "parser.y"
                                 { (yyval.no) = (yyvsp[0].no); }
-#line 1248 "parser.tab.c"
+#line 1522 "parser.tab.c"
     break;
 
   case 13: /* params: VOID  */
-#line 59 "parser.y"
+#line 65 "parser.y"
                          { (yyval.no) = (yyvsp[0].no); }
-#line 1254 "parser.tab.c"
+#line 1528 "parser.tab.c"
     break;
 
   case 14: /* param-lista: param-lista VRG param  */
-#line 61 "parser.y"
+#line 67 "parser.y"
                                           { (yyval.no) = criar_no(NODE_DECL_LISTA, (yyvsp[-2].no), (yyvsp[0].no), NULL, NULL);}
-#line 1260 "parser.tab.c"
+#line 1534 "parser.tab.c"
     break;
 
   case 15: /* param-lista: param  */
-#line 62 "parser.y"
+#line 68 "parser.y"
                           { (yyval.no) = (yyvsp[0].no); }
-#line 1266 "parser.tab.c"
+#line 1540 "parser.tab.c"
     break;
 
   case 16: /* param: tipo-especificador ID  */
-#line 64 "parser.y"
+#line 70 "parser.y"
                                           { (yyval.no) = criar_no(NODE_VAR_DECL, (yyvsp[-1].no), (yyvsp[0].no), NULL, NULL); }
-#line 1272 "parser.tab.c"
+#line 1546 "parser.tab.c"
     break;
 
   case 17: /* param: tipo-especificador ID OPN_CLC CLS_CLC  */
-#line 65 "parser.y"
-                                                          { (yyval.no) = criar_no(NODE_VAR_DECL, (yyvsp[-3].no), (yyvsp[-2].no), criar_folha_id(strdup("[]")), NULL); }
-#line 1278 "parser.tab.c"
+#line 71 "parser.y"
+                                                          { (yyval.no) = criar_no(NODE_VAR_DECL, (yyvsp[-3].no), (yyvsp[-2].no), criar_folha_id(strdup("[]"), yylineno), NULL); }
+#line 1552 "parser.tab.c"
     break;
 
   case 18: /* composto-decl: OPN_CHA local-declaracoes statement-lista CLS_CHA  */
-#line 67 "parser.y"
+#line 73 "parser.y"
                                                                       { (yyval.no) = criar_no(NODE_COMPOSTO_DECL, (yyvsp[-2].no), (yyvsp[-1].no), NULL, NULL);}
-#line 1284 "parser.tab.c"
+#line 1558 "parser.tab.c"
     break;
 
   case 19: /* local-declaracoes: local-declaracoes var-declaracao  */
-#line 69 "parser.y"
+#line 75 "parser.y"
                                                      { (yyval.no) = criar_no(NODE_DECL_LISTA, (yyvsp[-1].no), (yyvsp[0].no), NULL, NULL); }
-#line 1290 "parser.tab.c"
+#line 1564 "parser.tab.c"
     break;
 
   case 20: /* local-declaracoes: %empty  */
-#line 70 "parser.y"
+#line 76 "parser.y"
                     { (yyval.no) = NULL; }
-#line 1296 "parser.tab.c"
+#line 1570 "parser.tab.c"
     break;
 
   case 21: /* statement-lista: statement-lista statement  */
-#line 72 "parser.y"
+#line 78 "parser.y"
                                               { (yyval.no) = criar_no(NODE_DECL_LISTA, (yyvsp[-1].no), (yyvsp[0].no), NULL, NULL); }
-#line 1302 "parser.tab.c"
+#line 1576 "parser.tab.c"
     break;
 
   case 22: /* statement-lista: %empty  */
-#line 73 "parser.y"
+#line 79 "parser.y"
                     { (yyval.no) = NULL; }
-#line 1308 "parser.tab.c"
+#line 1582 "parser.tab.c"
     break;
 
   case 23: /* statement: expressao-decl  */
-#line 75 "parser.y"
+#line 81 "parser.y"
                                    { (yyval.no) = (yyvsp[0].no); }
-#line 1314 "parser.tab.c"
+#line 1588 "parser.tab.c"
     break;
 
   case 24: /* statement: composto-decl  */
-#line 76 "parser.y"
+#line 82 "parser.y"
                                   { (yyval.no) = (yyvsp[0].no); }
-#line 1320 "parser.tab.c"
+#line 1594 "parser.tab.c"
     break;
 
   case 25: /* statement: selecao-decl  */
-#line 77 "parser.y"
+#line 83 "parser.y"
                                  { (yyval.no) = (yyvsp[0].no); }
-#line 1326 "parser.tab.c"
+#line 1600 "parser.tab.c"
     break;
 
   case 26: /* statement: iteracao-decl  */
-#line 78 "parser.y"
+#line 84 "parser.y"
                                   { (yyval.no) = (yyvsp[0].no); }
-#line 1332 "parser.tab.c"
+#line 1606 "parser.tab.c"
     break;
 
   case 27: /* statement: retorno-decl  */
-#line 79 "parser.y"
+#line 85 "parser.y"
                                 { (yyval.no) = (yyvsp[0].no); }
-#line 1338 "parser.tab.c"
+#line 1612 "parser.tab.c"
     break;
 
   case 28: /* expressao-decl: expressao PNT_VRG  */
-#line 81 "parser.y"
+#line 87 "parser.y"
                                       { (yyval.no) = (yyvsp[-1].no); }
-#line 1344 "parser.tab.c"
+#line 1618 "parser.tab.c"
     break;
 
   case 29: /* expressao-decl: PNT_VRG  */
-#line 82 "parser.y"
+#line 88 "parser.y"
                             { (yyval.no) = NULL; }
-#line 1350 "parser.tab.c"
+#line 1624 "parser.tab.c"
     break;
 
   case 30: /* selecao-decl: IF OPN_PAR expressao CLS_PAR statement  */
-#line 84 "parser.y"
+#line 90 "parser.y"
                                                            { (yyval.no) = criar_no(NODE_IF, (yyvsp[-2].no), (yyvsp[0].no), NULL, NULL); }
-#line 1356 "parser.tab.c"
+#line 1630 "parser.tab.c"
     break;
 
   case 31: /* selecao-decl: IF OPN_PAR expressao CLS_PAR statement ELSE statement  */
-#line 85 "parser.y"
+#line 91 "parser.y"
                                                                           { (yyval.no) = criar_no(NODE_IF, (yyvsp[-4].no), (yyvsp[-2].no), (yyvsp[0].no), NULL);}
-#line 1362 "parser.tab.c"
+#line 1636 "parser.tab.c"
     break;
 
   case 32: /* iteracao-decl: WHILE OPN_PAR expressao CLS_PAR statement  */
-#line 87 "parser.y"
+#line 93 "parser.y"
                                                               { (yyval.no) = criar_no(NODE_WHILE, (yyvsp[-2].no), (yyvsp[0].no), NULL, NULL);}
-#line 1368 "parser.tab.c"
+#line 1642 "parser.tab.c"
     break;
 
   case 33: /* retorno-decl: RETURN PNT_VRG  */
-#line 89 "parser.y"
+#line 95 "parser.y"
                                    { (yyval.no) = criar_no(NODE_RETURN, NULL, NULL, NULL, NULL); }
-#line 1374 "parser.tab.c"
+#line 1648 "parser.tab.c"
     break;
 
   case 34: /* retorno-decl: RETURN expressao PNT_VRG  */
-#line 90 "parser.y"
+#line 96 "parser.y"
                                              { (yyval.no) = criar_no(NODE_RETURN, (yyvsp[-1].no), NULL, NULL, NULL);}
-#line 1380 "parser.tab.c"
+#line 1654 "parser.tab.c"
     break;
 
   case 35: /* expressao: var EQ expressao  */
-#line 92 "parser.y"
+#line 98 "parser.y"
                                      { (yyval.no) = criar_no(NODE_ASSIGN, (yyvsp[-2].no), (yyvsp[0].no), NULL, NULL);}
-#line 1386 "parser.tab.c"
+#line 1660 "parser.tab.c"
     break;
 
   case 36: /* expressao: simples-expressao  */
-#line 93 "parser.y"
+#line 99 "parser.y"
                                       { (yyval.no) = (yyvsp[0].no); }
-#line 1392 "parser.tab.c"
+#line 1666 "parser.tab.c"
     break;
 
   case 37: /* var: ID  */
-#line 95 "parser.y"
+#line 101 "parser.y"
                        { (yyval.no) = criar_no(NODE_VAR, (yyvsp[0].no), NULL, NULL, NULL); }
-#line 1398 "parser.tab.c"
+#line 1672 "parser.tab.c"
     break;
 
   case 38: /* var: ID OPN_CLC expressao CLS_CLC  */
-#line 96 "parser.y"
+#line 102 "parser.y"
                                                  { (yyval.no) = criar_no(NODE_VAR, (yyvsp[-3].no), (yyvsp[-1].no), NULL, NULL);}
-#line 1404 "parser.tab.c"
+#line 1678 "parser.tab.c"
     break;
 
   case 39: /* simples-expressao: soma-expressao relacional soma-expressao  */
-#line 99 "parser.y"
+#line 105 "parser.y"
                     {
-                    /* $2 é o nó do operador (<, ==, etc.). Vamos "promovê-lo" a pai */
+                    /* $2 é o relacional */
                     (yyvsp[-1].no)->p1 = (yyvsp[-2].no); /* p1=lado esq */
                     (yyvsp[-1].no)->p2 = (yyvsp[0].no); /* p2=lado dir */
                     (yyval.no) = (yyvsp[-1].no);
                     }
-#line 1415 "parser.tab.c"
+#line 1689 "parser.tab.c"
     break;
 
   case 40: /* simples-expressao: soma-expressao  */
-#line 105 "parser.y"
+#line 111 "parser.y"
                                    { (yyval.no) = (yyvsp[0].no); }
-#line 1421 "parser.tab.c"
+#line 1695 "parser.tab.c"
     break;
 
   case 41: /* relacional: RELACIONAL  */
-#line 107 "parser.y"
+#line 113 "parser.y"
                                { (yyval.no) = (yyvsp[0].no); }
-#line 1427 "parser.tab.c"
+#line 1701 "parser.tab.c"
     break;
 
   case 42: /* soma-expressao: soma-expressao soma termo  */
-#line 110 "parser.y"
+#line 116 "parser.y"
                     {
-                    /* $2 é o nó do operador (+ ou -). Promove a pai */
+                    /* $2 é o operador */
                     (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
                     (yyvsp[-1].no)->p2 = (yyvsp[0].no);
                     (yyval.no) = (yyvsp[-1].no);
                     }
-#line 1438 "parser.tab.c"
+#line 1712 "parser.tab.c"
     break;
 
   case 43: /* soma-expressao: termo  */
-#line 116 "parser.y"
+#line 122 "parser.y"
                           { (yyval.no) = (yyvsp[0].no); }
-#line 1444 "parser.tab.c"
+#line 1718 "parser.tab.c"
     break;
 
   case 44: /* soma: PLUS  */
-#line 118 "parser.y"
+#line 124 "parser.y"
                          { (yyval.no) = (yyvsp[0].no); }
-#line 1450 "parser.tab.c"
+#line 1724 "parser.tab.c"
     break;
 
   case 45: /* soma: MINUS  */
-#line 119 "parser.y"
+#line 125 "parser.y"
                           { (yyval.no) = (yyvsp[0].no); }
-#line 1456 "parser.tab.c"
+#line 1730 "parser.tab.c"
     break;
 
   case 46: /* termo: termo mult fator  */
-#line 122 "parser.y"
+#line 128 "parser.y"
                     {
-                    /* $2 é o nó do operador (* ou /). Promove a pai */
                     (yyvsp[-1].no)->p1 = (yyvsp[-2].no);
                     (yyvsp[-1].no)->p2 = (yyvsp[0].no);
                     (yyval.no) = (yyvsp[-1].no);
                     }
-#line 1467 "parser.tab.c"
+#line 1740 "parser.tab.c"
     break;
 
   case 47: /* termo: fator  */
-#line 128 "parser.y"
+#line 133 "parser.y"
                           { (yyval.no) = (yyvsp[0].no); }
-#line 1473 "parser.tab.c"
+#line 1746 "parser.tab.c"
     break;
 
   case 48: /* mult: MULT  */
-#line 130 "parser.y"
+#line 135 "parser.y"
                          { (yyval.no) = (yyvsp[0].no); }
-#line 1479 "parser.tab.c"
+#line 1752 "parser.tab.c"
     break;
 
   case 49: /* mult: DIV  */
-#line 131 "parser.y"
+#line 136 "parser.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1485 "parser.tab.c"
+#line 1758 "parser.tab.c"
     break;
 
   case 50: /* fator: OPN_PAR expressao CLS_PAR  */
-#line 133 "parser.y"
+#line 138 "parser.y"
                                               { (yyval.no) = (yyvsp[-1].no); }
-#line 1491 "parser.tab.c"
+#line 1764 "parser.tab.c"
     break;
 
   case 51: /* fator: var  */
-#line 134 "parser.y"
+#line 139 "parser.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1497 "parser.tab.c"
+#line 1770 "parser.tab.c"
     break;
 
   case 52: /* fator: ativacao  */
-#line 135 "parser.y"
+#line 140 "parser.y"
                              { (yyval.no) = (yyvsp[0].no); }
-#line 1503 "parser.tab.c"
+#line 1776 "parser.tab.c"
     break;
 
   case 53: /* fator: NUM  */
-#line 136 "parser.y"
+#line 141 "parser.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1509 "parser.tab.c"
+#line 1782 "parser.tab.c"
     break;
 
   case 54: /* ativacao: ID OPN_PAR args CLS_PAR  */
-#line 138 "parser.y"
+#line 143 "parser.y"
                                             { (yyval.no) = criar_no(NODE_CALLBACK, (yyvsp[-3].no), (yyvsp[-1].no), NULL, NULL);}
-#line 1515 "parser.tab.c"
+#line 1788 "parser.tab.c"
     break;
 
   case 55: /* args: arg-lista  */
-#line 140 "parser.y"
+#line 145 "parser.y"
                               { (yyval.no) = (yyvsp[0].no); }
-#line 1521 "parser.tab.c"
+#line 1794 "parser.tab.c"
     break;
 
   case 56: /* args: %empty  */
-#line 141 "parser.y"
+#line 146 "parser.y"
                     { (yyval.no) = NULL; }
-#line 1527 "parser.tab.c"
+#line 1800 "parser.tab.c"
     break;
 
   case 57: /* arg-lista: arg-lista VRG expressao  */
-#line 143 "parser.y"
+#line 148 "parser.y"
                                             { (yyval.no) = criar_no(NODE_DECL_LISTA, (yyvsp[-2].no), (yyvsp[0].no), NULL, NULL);}
-#line 1533 "parser.tab.c"
+#line 1806 "parser.tab.c"
     break;
 
   case 58: /* arg-lista: expressao  */
-#line 144 "parser.y"
+#line 149 "parser.y"
                               { (yyval.no) = (yyvsp[0].no); }
-#line 1539 "parser.tab.c"
+#line 1812 "parser.tab.c"
     break;
 
 
-#line 1543 "parser.tab.c"
+#line 1816 "parser.tab.c"
 
       default: break;
     }
@@ -1586,7 +1859,37 @@ yyerrlab:
   if (!yyerrstatus)
     {
       ++yynerrs;
-      yyerror (YY_("syntax error"));
+      {
+        yypcontext_t yyctx
+          = {yyssp, yytoken};
+        char const *yymsgp = YY_("syntax error");
+        int yysyntax_error_status;
+        yysyntax_error_status = yysyntax_error (&yymsg_alloc, &yymsg, &yyctx);
+        if (yysyntax_error_status == 0)
+          yymsgp = yymsg;
+        else if (yysyntax_error_status == -1)
+          {
+            if (yymsg != yymsgbuf)
+              YYSTACK_FREE (yymsg);
+            yymsg = YY_CAST (char *,
+                             YYSTACK_ALLOC (YY_CAST (YYSIZE_T, yymsg_alloc)));
+            if (yymsg)
+              {
+                yysyntax_error_status
+                  = yysyntax_error (&yymsg_alloc, &yymsg, &yyctx);
+                yymsgp = yymsg;
+              }
+            else
+              {
+                yymsg = yymsgbuf;
+                yymsg_alloc = sizeof yymsgbuf;
+                yysyntax_error_status = YYENOMEM;
+              }
+          }
+        yyerror (yymsgp);
+        if (yysyntax_error_status == YYENOMEM)
+          YYNOMEM;
+      }
     }
 
   if (yyerrstatus == 3)
@@ -1728,11 +2031,13 @@ yyreturnlab:
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
-
+  if (yymsg != yymsgbuf)
+    YYSTACK_FREE (yymsg);
   return yyresult;
 }
 
-#line 146 "parser.y"
+#line 151 "parser.y"
+
 
 
 int main(int argc, char *argv[]){
@@ -1747,18 +2052,38 @@ if (argc == 2){
     else {
         yyin = stdin;
     }
-    
-    yyparse(); 
 
-    if (raiz_ast != NULL) {
-        fprintf(stderr, "\nÁrvore Sintática Gerada com Sucesso.\n");
+    int resultado_parse = yyparse();
 
-        print_arvore(raiz_ast, 0);
-        
-        free_tree(raiz_ast);
+    if (resultado_parse == 0 && erro_lexico == 0) {
+        if (raiz_ast != NULL) {
+
+            int erros = analise_semantica(raiz_ast);
+            if(erros == 0){
+
+                printf("\nCódigo sem erros léxicos, sintáticos ou semânticos!\n");
+
+                printf("\nÁrvore Sintática Gerada com Sucesso.\n");
+                print_arvore(raiz_ast, 0);
+            }
+            else{
+                printf("\nArvore suprimida devido a erros semanticos.\n");
+            }
+
+            free_tree(raiz_ast);
+        }
     } 
-    else {
-        fprintf(stderr, "\nFalha ao gerar a Árvore Sintática.\n");
+    else if(resultado_parse == 1){
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros sintáticos.\n");
+    }
+    else if(erro_lexico == 1){
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros sintáticos.\n");
+    }
+    else{
+
+        fprintf(stderr, "\nCompilacao abortada devido a erros não previstos.\n");
     }
 
     if (f_in) fclose(f_in);
@@ -1767,5 +2092,5 @@ if (argc == 2){
 }
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro de sintaxe: %s\n", s);
+    fprintf(stderr, "Erro Sintatico (Linha %d): %s\n", yylineno, s);
 }
